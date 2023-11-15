@@ -8,7 +8,7 @@ import seaborn as sns
 MODEL = ['resnet18', 'vgg11', 'convnext', 'dinov2']
 ZOOM = ['20x', '50x']
 IMAGE_TYPE = ['heightmap', 'texture']
-NORM_TYPE = ['l2']
+NORM_TYPE = ['cosine']
 RESOLUTION = ['256', '512', '865']
 
 def normalize(input_array):
@@ -41,7 +41,7 @@ def load_distance(resolution="256"):
                 for norm_type in NORM_TYPE:
                     filename = f"data/{resolution}_{zoom}_{image_type}_{model}_{norm_type}.npy"
                     distance = load_npy_data(filename)
-                    selected_distance = np.random.choice(distance, 1000, replace=False)
+                    selected_distance = np.random.choice(distance, 10000, replace=False)
                     distance_data.append(EXP(resolution, zoom, image_type, model, norm_type, selected_distance))
 
     return distance_data
@@ -172,7 +172,7 @@ if __name__ == "__main__":
     # ax.set_xlabel('Model', fontsize=28)
     ax.set_ylabel('Feature Distance', fontsize=24)
     ax.tick_params(axis='y', labelsize=20)
-    ax.set_title(f'Resolution: {RESOLUTION}', fontsize=28)
+    # ax.set_title(f'Resolution: {RESOLUTION}', fontsize=28)
     ax.set_xticks(positions)
     ax.set_xticklabels(['VGG11', 'ResNet18', 'ConvNext', 'DINOv2'], fontsize=28)
 
@@ -180,7 +180,7 @@ if __name__ == "__main__":
     sns.set_palette("colorblind")
     labels = ['20x Texture', '20x Heightmap', '50x Texture', '50x Heightmap']
     handles = [plt.Rectangle((0, 0), 1, 1, color=sns.color_palette()[i]) for i in range(len(labels))]
-    ax.legend(handles, labels, loc='upper left', fontsize=22, bbox_to_anchor=(0.03, -0.2), ncol=4)
+    ax.legend(handles, labels, fontsize=28, bbox_to_anchor=(1.05, -0.2), ncol=4)
     # Adjust the bottom spacing
     plt.subplots_adjust(bottom=0.3)  # Increase the whitespace below the graph
 
@@ -196,6 +196,6 @@ if __name__ == "__main__":
     plt.savefig(f"visual/feature_distribution_{RESOLUTION}.png", bbox_inches='tight', dpi=300)
 
     # Show the plot
-    plt.show()
+    # plt.show()
 
 

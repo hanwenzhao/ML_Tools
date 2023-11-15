@@ -12,7 +12,7 @@ from torchvision.models import vit_b_16, ViT_B_16_Weights
 def feature_extractor_resnet18():
 
     weights = ResNet18_Weights.DEFAULT
-    preprocess = weights.transforms()
+    preprocess = weights.transforms(antialias=True)
 
     model = resnet18(weights=weights)
     model.eval()
@@ -24,7 +24,7 @@ def feature_extractor_resnet18():
 def feature_extractor_alexnet():
 
     weights = AlexNet_Weights.DEFAULT
-    preprocess = weights.transforms()
+    preprocess = weights.transforms(antialias=True)
 
     model = alexnet(weights=weights)
     model.eval()
@@ -36,7 +36,7 @@ def feature_extractor_alexnet():
 def feature_extractor_convnext():
 
     weights = ConvNeXt_Tiny_Weights.DEFAULT
-    preprocess = weights.transforms()
+    preprocess = weights.transforms(antialias=True)
 
     model = convnext_tiny(weights=weights)
     model.eval()
@@ -49,7 +49,7 @@ def feature_extractor_convnext():
 def feature_extractor_vgg11():
 
     weights = VGG11_Weights.DEFAULT
-    preprocess = weights.transforms()
+    preprocess = weights.transforms(antialias=True)
 
     model = vgg11(weights=weights)
     model.eval()
@@ -61,7 +61,7 @@ def feature_extractor_vgg11():
 def feature_extractor_vit():
 
     weights = ViT_B_16_Weights.DEFAULT
-    preprocess = weights.transforms()
+    preprocess = weights.transforms(antialias=True)
 
     model = vit_b_16(weights=weights)
     model.eval()

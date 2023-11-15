@@ -8,6 +8,8 @@ from PIL import Image
 from tqdm import tqdm
 import argparse
 from models import *
+from tqdm import tqdm
+from torchmetrics.functional import pairwise_cosine_similarity
 
 
 def read_image_tensor(image_path):
@@ -70,16 +72,24 @@ def batch_feature_extractor(feature_extractor, preprocess, image_path_list, batc
 def distance_matrix_gpu(feature_tensor, norm_type, device):
 
     num_vectors = feature_tensor.shape[0]
-    distance_matrix = torch.zeros((num_vectors, num_vectors)).to(device)
+    
+    cosine_distance = torch.nn.CosineSimilarity(dim=2, eps=1e-6)
 
     if norm_type == "l2":
+        distance_matrix = torch.zeros((num_vectors, num_vectors)).to(device)
         distance_matrix = torch.cdist(feature_tensor, feature_tensor, p=2)
     elif norm_type == "l1":
+        distance_matrix = torch.zeros((num_vectors, num_vectors)).to(device)
         distance_matrix = torch.cdist(feature_tensor, feature_tensor, p=1)
     elif norm_type == "inf":
+        distance_matrix = torch.zeros((num_vectors, num_vectors)).to(device)
         distance_matrix = torch.cdist(feature_tensor, feature_tensor, p=0)
-
+    elif norm_type == "cosine":
+        print(f'Calculating cosine distance matrix...')
+        distance_matrix = pairwise_cosine_similarity(feature_tensor, feature_tensor)
+        
     return distance_matrix
+
 
 def find_cloest_to_mean(feature_array, image_path_list, csv_path):
     # calculate the mean
@@ -93,7 +103,7 @@ def find_cloest_to_mean(feature_array, image_path_list, csv_path):
 
     filename = image_path_list[closest_idx]
 
-    with open(f'closest_to_mean.txt', 'a') as f:
+    with open(f'closest_to_mean_cosine.txt', 'a') as f:
         content = f"{os.path.basename(csv_path[:-4])}\t{IMAGE_TYPE}\t{MODEL}\t{NORM_TYPE}\t{distances[closest_idx]:4f}\t{filename}"
 
         f.write(content + '\n')
@@ -110,7 +120,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--model", choices=["resnet18", "alexnet", "convnext", "vgg11", "vit", "dinov2"], default="resnet18", help="Choose the model (default: resnet18)")
     parser.add_argument("--image_type", choices=["heightmap", "texture"], default="texture", help="Choose the image type (default: texture)")
-    parser.add_argument("--norm", choices=["l2"], default="l2", help="Choose the norm type (default: l2)")
+    parser.add_argument("--norm", choices=["l2", 'l1', 'inf', 'cosine'], default="l2", help="Choose the norm type (default: l2)")
     parser.add_argument("--csv", required=True, help="Path to the CSV file containing image information")
     parser.add_argument("--batch_size", type=int, default=10, help="Batch size for feature extraction (default: 10)")
     parser.add_argument("--data_root", default="/mnt/SSD_SATA_0/DATASET/LUA_Dataset", help="Root folder of the dataset (LUA_Dataset)")
@@ -135,8 +145,6 @@ if __name__ == "__main__":
     print(f"Image Type:\t{IMAGE_TYPE.upper()}")
     print(f'CSV FILE:\t{CSV_PATH}')
     print(f"Batch Size:\t{BATCH_SIZE}\n")
-
-    
 
     # read csv file
     CSV_PATH = os.path.join(DATA_FOLDER_ROOT, CSV_PATH)
